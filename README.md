@@ -1,24 +1,31 @@
-# Frobnicator (this is a template)
+# Bubble Rustle
 
 ## Authors
-- Andrzej Głuszak (@agluszak on GitHub)
-- Linus Torvalds (@torvalds on GitHub)
+- Karol Kuźniak (@karqz on GitHub)
 
 ## Description
-Frobnicator is going to be a platformer game similar to Super Mario Bros made using Bevy game engine.
+Bubble Rustle is going to be a platformer-shooter game similar to Bubble Trouble/Struggle.
+Link to the youtube video of gameplay: <https://youtu.be/V5HAxc5RSwQ>. The game will not be a browser game.
 
 ## Features
-- map generator
+- level generator
 - shooting
-- enemy AI
+- bubble physics
 - game state saving and loading
 - scores
+- timer
+- two player mode (optional)
+- obstacles (optional)
+- different guns (optional)
 
 ## Plan
-In the first part we're going to implement the basics: movement, physics and shooting. The enemies will simply bounce from one edge of the platform to the other. There will be only a single map.
+In the first part we're going to implement the most important things: player movement, bubble physics and shooting. The bubbles will double/triple/quadruple and change size after being shot. There will be only one level for only one player.
 
-In the second part we're going to add random map generator, saving/loading, scores and a more sophisticated AI.
+In the second part we're going to add random level generator, scores and timer. In addition to this there will be two player mode, obstacles or different guns.
 
 ## Libraries
-- Bevy
-- Serde (for serialization)
+- Bevy (optionally ggez)
+- Serde (only for development)
+- kira (maybe for game audio)
+- log
+- rand
