@@ -6,3 +6,6 @@ In the second part, the game will have all the bells and whistles, like levels, 
 ## INSPIRATION:
 - <https://bevyengine.org/examples/games/breakout/>
 - <https://bevyengine.org/examples/games/breakout/>
+
+## USE:
+```cargo run ```
