@@ -41,7 +41,7 @@ fn spawn_player_system(
                 ..default()
             },
             Player,
-            GameScreen
+            GameScreen,
         ));
 
         player_state.spawn();
@@ -107,7 +107,7 @@ fn shot_player_system(
                     v_y: HOOK_SPEED,
                     a: 0.,
                 },
-                GameScreen
+                GameScreen,
             ));
             player_state.shoot_hook();
         }

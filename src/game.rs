@@ -29,6 +29,8 @@ const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 const BALL_COLOR: Color = Color::rgb(0.01, 0.9, 0.1);
 
 // GAME_CONFIGURATION
+const LIVE_COUNT: usize = 3;
+
 const TIME_STEP: f32 = 1. / 60.;
 const PLAYER_SPEED: f32 = 300.;
 const HOOK_SPEED: f32 = 100.;
@@ -53,14 +55,16 @@ struct GameTextures {
 #[derive(Default)]
 struct CollisionEvent;
 
-#[derive(Resource, Default)]
+#[derive(Resource)]
 struct PlayerState {
+    lives: usize,
     is_alive: bool,
     hook_shoted: bool,
 }
 
 impl PlayerState {
     fn kill(&mut self) {
+        self.lives -= 1;
         self.is_alive = false;
     }
     fn spawn(&mut self) {
@@ -73,6 +77,26 @@ impl PlayerState {
 
     fn unhook(&mut self) {
         self.hook_shoted = false;
+    }
+
+    fn is_completely_dead(&mut self) -> bool {
+        self.lives == 0
+    }
+
+    fn restart(&mut self) {
+        self.lives = LIVE_COUNT;
+        self.is_alive = false;
+        self.hook_shoted = false;
+    }
+}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        Self {
+            lives: LIVE_COUNT,
+            is_alive: false,
+            hook_shoted: false,
+        }
     }
 }
 
@@ -99,7 +123,7 @@ impl BubbleState {
     fn spawn(&mut self) {
         self.spawned = true;
     }
-    
+
     fn despawn(&mut self) {
         self.spawned = false;
     }
@@ -296,7 +320,7 @@ fn bubble_player_collision_system(
     player_query: Query<(Entity, &Transform), With<Player>>,
     mut collision_events: EventWriter<CollisionEvent>,
     mut game_state: ResMut<State<AppState>>,
-    mut bubble_state: ResMut<BubbleState>
+    mut bubble_state: ResMut<BubbleState>,
 ) {
     if player_state.is_alive {
         if let Ok((player_entity, player_transform)) = player_query.get_single() {
@@ -315,8 +339,11 @@ fn bubble_player_collision_system(
                     collision_events.send_default();
                     commands.entity(player_entity).despawn();
                     player_state.kill();
-                    game_state.set(AppState::Menu).unwrap();
-                    bubble_state.despawn();
+                    if player_state.is_completely_dead() {
+                        game_state.set(AppState::Menu).unwrap();
+                        bubble_state.despawn();
+                        player_state.restart();
+                    }
                     break;
                 }
             }
