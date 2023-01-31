@@ -1,8 +1,10 @@
 use bevy::prelude::*;
 use game::GamePlugin;
+use menu::MenuPlugin;
 use splash::SplashPlugin;
 
 mod game;
+mod menu;
 mod splash;
 
 // WINDOW CONFIGURATION
@@ -16,6 +18,7 @@ const BACKGROUND_COLOR: Color = Color::rgb(0.5, 0.45, 0.5);
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum AppState {
     Splash,
+    Menu,
     Game,
 }
 
@@ -39,7 +42,7 @@ fn main() {
         }))
         .add_state(AppState::Splash)
         .add_plugin(SplashPlugin)
-        // .add_plugin(MenuPlugin)
+        .add_plugin(MenuPlugin)
         .add_plugin(GamePlugin)
         .run();
 }
