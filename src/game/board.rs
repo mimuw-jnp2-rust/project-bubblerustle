@@ -9,10 +9,9 @@ pub struct BoardPlugin;
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(
-                SystemSet::on_enter(AppState::Game
-            )
-            .with_system(add_walls_system)
-            .with_system(score_system)
+            SystemSet::on_enter(AppState::Game)
+                .with_system(add_walls_system)
+                .with_system(score_system),
         );
     }
 }
@@ -80,24 +79,28 @@ fn add_walls_system(mut commands: Commands) {
     commands.spawn((WallBundle::new(WallLocation::Top), GameScreen));
 }
 
-
 fn score_system(mut commands: Commands, fonts: Res<Fonts>) {
-    let score_text_style = TextStyle { font: fonts.default.clone(), font_size: 40.0, color: Color::GOLD};
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                margin: UiRect::all(Val::Auto),
-                align_items: AlignItems::Center,
+    let score_text_style = TextStyle {
+        font: fonts.default.clone(),
+        font_size: 40.0,
+        color: Color::GOLD,
+    };
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    margin: UiRect::all(Val::Auto),
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
                 ..default()
             },
-            ..default()
-        },
-        GameScreen,
-    ))
-    .with_children(|parent| {
-        parent.spawn((
-            TextBundle::from_section("Score: 0".to_string(), score_text_style),
-            ScoreText
-        ));
-    });
+            GameScreen,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section("Score: 0".to_string(), score_text_style),
+                ScoreText,
+            ));
+        });
 }

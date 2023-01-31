@@ -251,6 +251,10 @@ fn bubble_hook_collision_system(
     mut collision_events: EventWriter<CollisionEvent>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<ColorMaterial>>,
+    mut bubble_state: ResMut<BubbleState>,
+    mut game_state: ResMut<State<AppState>>,
+    mut scores: ResMut<Scores>,
+    current_score: Res<Score>,
 ) {
     let mut despawned_entities = HashSet::new();
     for (hook_entity, hook_transform) in hook_query.iter() {
@@ -283,7 +287,9 @@ fn bubble_hook_collision_system(
                     bubble_transform.translation.x,
                     bubble_transform.translation.y,
                 );
+                bubble_state.count -= 1;
                 if bubble_size.size > 2. {
+                    bubble_state.count += 2;
                     let new_bubble_size = bubble_size.size - 1.;
                     for a in 0..2 {
                         let direction = if a == 0 { -1. } else { 1. };
@@ -345,6 +351,12 @@ fn bubble_hook_collision_system(
             }
         }
     }
+    if bubble_state.count == 0 {
+        game_state.set(AppState::Menu).unwrap();
+        bubble_state.despawn();
+        scores.score_list.push(current_score.score);
+        player_state.restart();
+    }
 }
 
 fn bubble_player_collision_system(
@@ -395,7 +407,7 @@ fn reward_player_collision_system(
     player_query: Query<&Transform, With<Player>>,
     mut collision_events: EventWriter<CollisionEvent>,
     mut current_score: ResMut<Score>,
-    mut score_text_query: Query<&mut Text, With<ScoreText>>
+    mut score_text_query: Query<&mut Text, With<ScoreText>>,
 ) {
     let mut score_updated = false;
     if player_state.is_alive {
@@ -425,9 +437,7 @@ fn reward_player_collision_system(
         }
     }
 
-    if score_updated || !current_score.spawned {
-
-    }
+    if score_updated || !current_score.spawned {}
 }
 
 fn reward_wall_collision_system(
