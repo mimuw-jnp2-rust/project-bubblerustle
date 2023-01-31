@@ -4,6 +4,7 @@ use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
 use crate::{AppState, Fonts};
 
 use super::components::{GameScreen, ScoreText};
+use super::{SCORE_TEXT_X, SCORE_TEXT_Y};
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
@@ -89,6 +90,11 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>) {
         .spawn((
             NodeBundle {
                 style: Style {
+                    position: UiRect {
+                        left: Val::Px(SCORE_TEXT_X),
+                        bottom: Val::Px(SCORE_TEXT_Y),
+                        ..default()
+                    },
                     margin: UiRect::all(Val::Auto),
                     align_items: AlignItems::Center,
                     ..default()

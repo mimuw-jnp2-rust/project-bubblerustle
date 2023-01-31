@@ -51,6 +51,9 @@ const RIGHT: f32 = 550.;
 const BOTTOM: f32 = -400.;
 const TOP: f32 = 400.;
 
+const SCORE_TEXT_X: f32 = 500.;
+const SCORE_TEXT_Y: f32 = 450.;
+
 // RESOURCES
 #[derive(Resource)]
 struct GameTextures {
@@ -64,7 +67,6 @@ struct CollisionEvent;
 #[derive(Resource, Default)]
 struct Score {
     score: usize,
-    spawned: bool,
 }
 
 #[derive(Resource)]
@@ -138,6 +140,13 @@ impl BubbleState {
 
     fn despawn(&mut self) {
         self.spawned = false;
+    }
+
+    fn restart(&mut self) {
+        self.count = 1;
+        self.spawned = false;
+        self.sizes = vec![4.];
+        self.positions = vec![(0., 0.)];
     }
 }
 
@@ -356,6 +365,7 @@ fn bubble_hook_collision_system(
         bubble_state.despawn();
         scores.score_list.push(current_score.score);
         player_state.restart();
+        bubble_state.restart();
     }
 }
 
@@ -392,6 +402,7 @@ fn bubble_player_collision_system(
                         bubble_state.despawn();
                         scores.score_list.push(current_score.score);
                         player_state.restart();
+                        bubble_state.restart();
                     }
                     break;
                 }
@@ -409,7 +420,6 @@ fn reward_player_collision_system(
     mut current_score: ResMut<Score>,
     mut score_text_query: Query<&mut Text, With<ScoreText>>,
 ) {
-    let mut score_updated = false;
     if player_state.is_alive {
         if let Ok(player_transform) = player_query.get_single() {
             for (reward_entity, reward_transform, reward_score) in reward_query.iter() {
@@ -424,7 +434,6 @@ fn reward_player_collision_system(
                 );
 
                 if collision.is_some() {
-                    score_updated = true;
                     collision_events.send_default();
                     commands.entity(reward_entity).despawn();
                     current_score.score += reward_score.score;
@@ -436,8 +445,6 @@ fn reward_player_collision_system(
             }
         }
     }
-
-    if score_updated || !current_score.spawned {}
 }
 
 fn reward_wall_collision_system(
