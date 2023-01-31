@@ -55,6 +55,8 @@ fn setup_system(mut menu_state: ResMut<State<MenuState>>) {
     menu_state.set(MenuState::Main).unwrap();
 }
 
+// This is intended.
+#[allow(clippy::type_complexity)]
 fn button_system(
     mut interaction_query: Query<
         (&Interaction, &mut BackgroundColor, Option<&SelectedOption>),
@@ -161,6 +163,8 @@ fn main_system(mut commands: Commands, fonts: Res<Fonts>) {
         });
 }
 
+// This is intended.
+#[allow(clippy::type_complexity)]
 fn action_system(
     interaction_query: Query<
         (&Interaction, &MenuButtonAction),
@@ -218,7 +222,7 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Sc
             ScoresScreen,
         ))
         .with_children(|parent| {
-            if scores.score_list.len() > 0 {
+            if !scores.score_list.is_empty() {
                 parent.spawn(TextBundle::from_section(
                     TEXT_SCORES.to_string(),
                     score_text_style.clone(),

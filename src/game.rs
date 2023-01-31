@@ -261,6 +261,8 @@ fn bubble_wall_collision_system(
     }
 }
 
+// This is intended.
+#[allow(clippy::too_many_arguments)]
 fn bubble_hook_collision_system(
     mut commands: Commands,
     mut player_state: ResMut<PlayerState>,
@@ -378,6 +380,8 @@ fn bubble_hook_collision_system(
     }
 }
 
+// This is intended.
+#[allow(clippy::too_many_arguments)]
 fn bubble_player_collision_system(
     mut commands: Commands,
     mut player_state: ResMut<PlayerState>,
