@@ -1,4 +1,4 @@
-use crate::game::components::{Hook, Movement, Player};
+use crate::game::components::{GameScreen, Hook, Movement, Player};
 use crate::game::{
     GameTextures, PlayerState, BOTTOM, HOOK_SIZE, HOOK_SPEED, HOOK_WIDTH_SCALE, LEFT, PLAYER_SCALE,
     PLAYER_SIZE, PLAYER_SPEED, RIGHT, TIME_STEP, WALL_SIZE,
@@ -41,6 +41,7 @@ fn spawn_player_system(
                 ..default()
             },
             Player,
+            GameScreen
         ));
 
         player_state.spawn();
@@ -106,6 +107,7 @@ fn shot_player_system(
                     v_y: HOOK_SPEED,
                     a: 0.,
                 },
+                GameScreen
             ));
             player_state.shoot_hook();
         }

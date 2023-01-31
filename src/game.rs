@@ -1,9 +1,9 @@
-use crate::AppState;
+use crate::{despawn_screen, AppState};
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::{collide, Collision};
 use bevy::sprite::MaterialMesh2dBundle;
 use bubble::BubblePlugin;
-use components::{Bubble, BubbleSize, Hook, Movement, Player, Wall};
+use components::{Bubble, BubbleSize, GameScreen, Hook, Movement, Player, Wall};
 use player::PlayerPlugin;
 use std::collections::HashSet;
 use wall::WallPlugin;
@@ -16,7 +16,6 @@ mod wall;
 pub struct GamePlugin;
 
 // ASSETS
-
 const PLAYER_FILE: &str = "player.png";
 const PLAYER_SIZE: (f32, f32) = (144., 75.);
 const PLAYER_SCALE: f32 = 0.5;
@@ -26,12 +25,10 @@ const HOOK_SIZE: (f32, f32) = (8., 199.);
 const HOOK_WIDTH_SCALE: f32 = 1.1;
 
 // COLOR
-
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 const BALL_COLOR: Color = Color::rgb(0.01, 0.9, 0.1);
 
 // GAME_CONFIGURATION
-
 const TIME_STEP: f32 = 1. / 60.;
 const PLAYER_SPEED: f32 = 300.;
 const HOOK_SPEED: f32 = 100.;
@@ -47,7 +44,6 @@ const BOTTOM: f32 = -400.;
 const TOP: f32 = 400.;
 
 // RESOURCES
-
 #[derive(Resource)]
 struct GameTextures {
     player: Handle<Image>,
@@ -102,6 +98,10 @@ impl Default for BubbleState {
 impl BubbleState {
     fn spawn(&mut self) {
         self.spawned = true;
+    }
+    
+    fn despawn(&mut self) {
+        self.spawned = false;
     }
 }
 
@@ -279,6 +279,7 @@ fn bubble_hook_collision_system(
                             BubbleSize {
                                 size: new_bubble_size,
                             },
+                            GameScreen,
                         ));
                     }
                 }
@@ -294,6 +295,8 @@ fn bubble_player_collision_system(
     bubble_query: Query<&Transform, With<Bubble>>,
     player_query: Query<(Entity, &Transform), With<Player>>,
     mut collision_events: EventWriter<CollisionEvent>,
+    mut game_state: ResMut<State<AppState>>,
+    mut bubble_state: ResMut<BubbleState>
 ) {
     if player_state.is_alive {
         if let Ok((player_entity, player_transform)) = player_query.get_single() {
@@ -312,6 +315,8 @@ fn bubble_player_collision_system(
                     collision_events.send_default();
                     commands.entity(player_entity).despawn();
                     player_state.kill();
+                    game_state.set(AppState::Menu).unwrap();
+                    bubble_state.despawn();
                     break;
                 }
             }
@@ -334,6 +339,9 @@ impl Plugin for GamePlugin {
                     .with_system(bubble_hook_collision_system)
                     .with_system(bubble_player_collision_system)
                     .with_system(bubble_velocity_system),
+            )
+            .add_system_set(
+                SystemSet::on_exit(AppState::Game).with_system(despawn_screen::<GameScreen>),
             );
     }
 }

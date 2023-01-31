@@ -1,9 +1,10 @@
-use crate::game::components::{Bubble, BubbleSize, Movement};
+use crate::game::components::{Bubble, BubbleSize, GameScreen, Movement};
 use crate::game::{BubbleState, BALL_COLOR, BALL_RADIUS, BALL_SLOWDOWN, BALL_SPEED_X, TIME_STEP};
 use crate::AppState;
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::time::FixedTimestep;
+
 pub struct BubblePlugin;
 
 impl Plugin for BubblePlugin {
@@ -39,6 +40,7 @@ fn bubble_spawn_system(
                     ..default()
                 },
                 Bubble,
+                GameScreen,
                 Movement {
                     v_x: BALL_SPEED_X,
                     v_y: BALL_SPEED_X * bubble_size,

@@ -72,9 +72,9 @@ fn main_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
 
     let title_text_style = TextStyle {
-        font: font.clone(), 
-        font_size: TEXT_TITLE_SIZE, 
-        color: TEXT_COLOR
+        font: font.clone(),
+        font_size: TEXT_TITLE_SIZE,
+        color: TEXT_COLOR,
     };
 
     let button_text_style = TextStyle {
@@ -98,11 +98,7 @@ fn main_system(mut commands: Commands, asset_server: Res<AssetServer>) {
         ))
         .with_children(|parent| {
             parent.spawn(
-                TextBundle::from_section(
-                    GAME_NAME,
-                    title_text_style
-                )
-                .with_style(Style {
+                TextBundle::from_section(GAME_NAME, title_text_style).with_style(Style {
                     margin: UiRect::all(Val::Px(MENU_MARGIN_PX)),
                     ..default()
                 }),
@@ -132,10 +128,9 @@ fn main_system(mut commands: Commands, asset_server: Res<AssetServer>) {
                     MenuButtonAction::Quit,
                 ))
                 .with_children(|parent| {
-                    parent.spawn(
-                        TextBundle::from_section(
+                    parent.spawn(TextBundle::from_section(
                         TEXT_QUIT_BUTTON.to_string(),
-                        button_text_style
+                        button_text_style,
                     ));
                 });
         });

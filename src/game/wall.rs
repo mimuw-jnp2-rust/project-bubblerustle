@@ -2,6 +2,8 @@ use bevy::prelude::*;
 
 use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
 use crate::AppState;
+
+use super::components::GameScreen;
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
@@ -67,8 +69,8 @@ impl WallBundle {
 }
 
 fn add_walls_system(mut commands: Commands) {
-    commands.spawn(WallBundle::new(WallLocation::Left));
-    commands.spawn(WallBundle::new(WallLocation::Right));
-    commands.spawn(WallBundle::new(WallLocation::Bottom));
-    commands.spawn(WallBundle::new(WallLocation::Top));
+    commands.spawn((WallBundle::new(WallLocation::Left), GameScreen));
+    commands.spawn((WallBundle::new(WallLocation::Right), GameScreen));
+    commands.spawn((WallBundle::new(WallLocation::Bottom), GameScreen));
+    commands.spawn((WallBundle::new(WallLocation::Top), GameScreen));
 }
