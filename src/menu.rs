@@ -1,4 +1,4 @@
-use crate::{despawn_screen, AppState, Fonts, GAME_NAME};
+use crate::{despawn_screen, AppState, Fonts, Scores, GAME_NAME};
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
@@ -13,6 +13,7 @@ const TEXT_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 
 const TEXT_PLAY_BUTTON: &str = "Let's Play!";
 const TEXT_QUIT_BUTTON: &str = "Quit!";
+const TEXT_SCORES_BUTTON: &str = "Scores";
 
 const TEXT_TITLE_SIZE: f32 = 80.0;
 const TEXT_BUTTON_SIZE: f32 = 45.0;
@@ -25,15 +26,21 @@ const PRESSED_BUTTON: Color = Color::rgb(0.35, 0.75, 0.35);
 #[derive(Component)]
 struct MainScreen;
 
+#[derive(Component)]
+struct ScoresScreen;
+
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum MenuState {
     Disabled,
+    Scores,
     Main,
 }
 
 #[derive(Component)]
 enum MenuButtonAction {
     Play,
+    Scores,
+    BackToMain,
     Quit,
 }
 
@@ -120,6 +127,21 @@ fn main_system(mut commands: Commands, fonts: Res<Fonts>) {
             parent
                 .spawn((
                     ButtonBundle {
+                        style: button_style.clone(),
+                        background_color: NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    MenuButtonAction::Scores,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        TEXT_SCORES_BUTTON.to_string(),
+                        button_text_style.clone(),
+                    ));
+                });
+            parent
+                .spawn((
+                    ButtonBundle {
                         style: button_style,
                         background_color: NORMAL_BUTTON.into(),
                         ..default()
@@ -152,9 +174,87 @@ fn action_system(
                     game_state.set(AppState::Game).unwrap();
                     menu_state.set(MenuState::Disabled).unwrap();
                 }
+                MenuButtonAction::Scores => menu_state.set(MenuState::Scores).unwrap(),
+                MenuButtonAction::BackToMain => menu_state.set(MenuState::Main).unwrap(),
             }
         }
     }
+}
+
+fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Scores>) {
+    let font = fonts.default.clone();
+    let score_text_style = TextStyle {
+        font: fonts.default.clone(),
+        font_size: 20.0,
+        color: TEXT_COLOR,
+    };
+    let button_style = Style {
+        size: Size::new(Val::Px(BUTTON_SIZE_PX.0), Val::Px(BUTTON_SIZE_PX.1)),
+        margin: UiRect::all(Val::Px(BUTTON_MARGIN_PX)),
+        justify_content: JustifyContent::Center,
+        align_items: AlignItems::Center,
+        ..default()
+    };
+    let button_text_style = TextStyle {
+        font,
+        font_size: TEXT_BUTTON_SIZE,
+        color: TEXT_COLOR,
+    };
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    margin: UiRect::all(Val::Auto),
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            ScoresScreen,
+        ))
+        .with_children(|parent| {
+            if scores.score_list.len() > 0 {
+                parent.spawn(TextBundle::from_section(
+                    "TOP SCORES OF ALL TIME:".to_string(),
+                    score_text_style.clone(),
+                ));
+            } else {
+                parent.spawn(TextBundle::from_section(
+                    "THERE ARE NO SCORES YET!".to_string(),
+                    score_text_style.clone(),
+                ));
+            }
+            scores.score_list.sort();
+            for position in 0..5 {
+                if scores.score_list.len() > position {
+                    if let Some(score) = scores
+                        .score_list
+                        .get(scores.score_list.len() - position - 1)
+                    {
+                        parent.spawn(TextBundle::from_section(
+                            format!("{}. {}", position + 1, score),
+                            score_text_style.clone(),
+                        ));
+                    }
+                }
+            }
+            parent
+                .spawn((
+                    ButtonBundle {
+                        style: button_style,
+                        background_color: NORMAL_BUTTON.into(),
+                        ..default()
+                    },
+                    MenuButtonAction::BackToMain,
+                ))
+                .with_children(|parent| {
+                    parent.spawn(TextBundle::from_section(
+                        "Back to menu".to_string(),
+                        button_text_style,
+                    ));
+                });
+        });
 }
 
 impl Plugin for MenuPlugin {
@@ -165,6 +265,10 @@ impl Plugin for MenuPlugin {
             .add_system_set(
                 SystemSet::on_exit(MenuState::Main).with_system(despawn_screen::<MainScreen>),
             )
+            .add_system_set(
+                SystemSet::on_exit(MenuState::Scores).with_system(despawn_screen::<ScoresScreen>),
+            )
+            .add_system_set(SystemSet::on_enter(MenuState::Scores).with_system(score_system))
             .add_system_set(
                 SystemSet::on_update(AppState::Menu)
                     .with_system(action_system)
