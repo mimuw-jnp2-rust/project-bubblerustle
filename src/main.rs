@@ -1,6 +1,8 @@
 use bevy::prelude::*;
+use splash::SplashPlugin;
 use game::GamePlugin;
 
+mod splash;
 mod game;
 
 // WINDOW CONFIGURATION
@@ -10,6 +12,20 @@ const RESIZABLE: bool = false;
 
 // COLOR
 const BACKGROUND_COLOR: Color = Color::rgb(0.5, 0.45, 0.5);
+
+
+#[derive(Clone, Eq, PartialEq, Debug, Hash)]
+enum AppState {
+    Splash,
+    Game,
+}
+
+
+fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
+    for entity in &to_despawn {
+        commands.entity(entity).despawn_recursive();
+    }
+}
 
 fn main() {
     App::new()
@@ -23,7 +39,9 @@ fn main() {
             },
             ..Default::default()
         }))
+        .add_state(AppState::Splash)
+        .add_plugin(SplashPlugin)
+        // .add_plugin(MenuPlugin)
         .add_plugin(GamePlugin)
-        .add_system(bevy::window::close_on_esc)
         .run();
 }

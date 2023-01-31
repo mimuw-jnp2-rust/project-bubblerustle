@@ -1,12 +1,15 @@
 use bevy::prelude::*;
 
 use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
-
+use crate::AppState;
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(add_walls_system);
+        app.add_system_set(
+            SystemSet::on_enter(AppState::Game)
+            .with_system(add_walls_system)
+        );
     }
 }
 
