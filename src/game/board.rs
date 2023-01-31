@@ -3,8 +3,11 @@ use bevy::prelude::*;
 use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
 use crate::{AppState, Fonts};
 
-use super::components::{GameScreen, ScoreText};
-use super::{SCORE_TEXT_X, SCORE_TEXT_Y};
+use super::components::{GameScreen, LivesText, ScoreText};
+use super::{
+    LIVES_TEXT_COLOR, LIVES_TEXT_DEFAULT, LIVES_TEXT_SIZE, LIVES_TEXT_X, LIVES_TEXT_Y,
+    SCORE_TEXT_COLOR, SCORE_TEXT_DEFAULT, SCORE_TEXT_SIZE, SCORE_TEXT_X, SCORE_TEXT_Y,
+};
 pub struct BoardPlugin;
 
 impl Plugin for BoardPlugin {
@@ -12,7 +15,8 @@ impl Plugin for BoardPlugin {
         app.add_system_set(
             SystemSet::on_enter(AppState::Game)
                 .with_system(add_walls_system)
-                .with_system(score_system),
+                .with_system(score_system)
+                .with_system(lives_system),
         );
     }
 }
@@ -83,8 +87,8 @@ fn add_walls_system(mut commands: Commands) {
 fn score_system(mut commands: Commands, fonts: Res<Fonts>) {
     let score_text_style = TextStyle {
         font: fonts.default.clone(),
-        font_size: 40.0,
-        color: Color::GOLD,
+        font_size: SCORE_TEXT_SIZE,
+        color: SCORE_TEXT_COLOR,
     };
     commands
         .spawn((
@@ -105,8 +109,39 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>) {
         ))
         .with_children(|parent| {
             parent.spawn((
-                TextBundle::from_section("Score: 0".to_string(), score_text_style),
+                TextBundle::from_section(SCORE_TEXT_DEFAULT.to_string(), score_text_style),
                 ScoreText,
+            ));
+        });
+}
+
+fn lives_system(mut commands: Commands, fonts: Res<Fonts>) {
+    let score_text_style = TextStyle {
+        font: fonts.default.clone(),
+        font_size: LIVES_TEXT_SIZE,
+        color: LIVES_TEXT_COLOR,
+    };
+    commands
+        .spawn((
+            NodeBundle {
+                style: Style {
+                    position: UiRect {
+                        left: Val::Px(LIVES_TEXT_X),
+                        bottom: Val::Px(LIVES_TEXT_Y),
+                        ..default()
+                    },
+                    margin: UiRect::all(Val::Auto),
+                    align_items: AlignItems::Center,
+                    ..default()
+                },
+                ..default()
+            },
+            GameScreen,
+        ))
+        .with_children(|parent| {
+            parent.spawn((
+                TextBundle::from_section(LIVES_TEXT_DEFAULT.to_string(), score_text_style),
+                LivesText,
             ));
         });
 }

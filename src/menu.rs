@@ -14,9 +14,13 @@ const TEXT_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 const TEXT_PLAY_BUTTON: &str = "Let's Play!";
 const TEXT_QUIT_BUTTON: &str = "Quit!";
 const TEXT_SCORES_BUTTON: &str = "Scores";
+const TEXT_SCORES: &str = "Top scores of all time:";
+const TEXT_NO_SCORES: &str = "There are no scores yet!";
+const TEXT_BACK_MENU: &str = "Back to menu!";
 
 const TEXT_TITLE_SIZE: f32 = 80.0;
 const TEXT_BUTTON_SIZE: f32 = 45.0;
+const TEXT_SCORE_SIZE: f32 = 60.0;
 
 const NORMAL_BUTTON: Color = Color::rgb(0.15, 0.15, 0.15);
 const HOVERED_BUTTON: Color = Color::rgb(0.25, 0.25, 0.25);
@@ -185,7 +189,7 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Sc
     let font = fonts.default.clone();
     let score_text_style = TextStyle {
         font: fonts.default.clone(),
-        font_size: 20.0,
+        font_size: TEXT_SCORE_SIZE,
         color: TEXT_COLOR,
     };
     let button_style = Style {
@@ -216,12 +220,12 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Sc
         .with_children(|parent| {
             if scores.score_list.len() > 0 {
                 parent.spawn(TextBundle::from_section(
-                    "TOP SCORES OF ALL TIME:".to_string(),
+                    TEXT_SCORES.to_string(),
                     score_text_style.clone(),
                 ));
             } else {
                 parent.spawn(TextBundle::from_section(
-                    "THERE ARE NO SCORES YET!".to_string(),
+                    TEXT_NO_SCORES.to_string(),
                     score_text_style.clone(),
                 ));
             }
@@ -233,7 +237,7 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Sc
                         .get(scores.score_list.len() - position - 1)
                     {
                         parent.spawn(TextBundle::from_section(
-                            format!("{}. {}", position + 1, score),
+                            format!("{}.    {}", position + 1, score),
                             score_text_style.clone(),
                         ));
                     }
@@ -250,7 +254,7 @@ fn score_system(mut commands: Commands, fonts: Res<Fonts>, mut scores: ResMut<Sc
                 ))
                 .with_children(|parent| {
                     parent.spawn(TextBundle::from_section(
-                        "Back to menu".to_string(),
+                        TEXT_BACK_MENU.to_string(),
                         button_text_style,
                     ));
                 });

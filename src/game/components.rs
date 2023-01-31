@@ -22,6 +22,9 @@ pub struct Reward;
 pub struct ScoreText;
 
 #[derive(Component)]
+pub struct LivesText;
+
+#[derive(Component)]
 pub struct RewardScore {
     pub score: usize,
 }

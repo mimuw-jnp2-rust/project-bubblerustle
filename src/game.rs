@@ -8,7 +8,7 @@ use components::{Bubble, BubbleSize, GameScreen, Hook, Movement, Player, Reward,
 use player::PlayerPlugin;
 use std::collections::HashSet;
 
-use self::components::{RewardScore, ScoreText};
+use self::components::{LivesText, RewardScore, ScoreText};
 
 mod board;
 mod bubble;
@@ -29,7 +29,9 @@ const HOOK_WIDTH_SCALE: f32 = 1.1;
 // COLOR
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 const BALL_COLOR: Color = Color::rgb(0.01, 0.9, 0.1);
-const REWARD_COLOR: Color = Color::rgb(1.0, 0.9, 0.);
+const REWARD_COLOR: Color = Color::GOLD;
+const SCORE_TEXT_COLOR: Color = Color::GOLD;
+const LIVES_TEXT_COLOR: Color = Color::GREEN;
 
 // GAME_CONFIGURATION
 const LIVE_COUNT: usize = 3;
@@ -51,8 +53,15 @@ const RIGHT: f32 = 550.;
 const BOTTOM: f32 = -400.;
 const TOP: f32 = 400.;
 
-const SCORE_TEXT_X: f32 = 500.;
+const LIVES_TEXT_DEFAULT: &str = "Lives: 3";
+const LIVES_TEXT_X: f32 = -225.;
+const LIVES_TEXT_Y: f32 = 450.;
+const LIVES_TEXT_SIZE: f32 = 50.0;
+
+const SCORE_TEXT_DEFAULT: &str = "Score: 0";
+const SCORE_TEXT_X: f32 = 225.;
 const SCORE_TEXT_Y: f32 = 450.;
+const SCORE_TEXT_SIZE: f32 = 40.0;
 
 // RESOURCES
 #[derive(Resource)]
@@ -379,6 +388,7 @@ fn bubble_player_collision_system(
     mut game_state: ResMut<State<AppState>>,
     mut bubble_state: ResMut<BubbleState>,
     mut scores: ResMut<Scores>,
+    mut lives_text_query: Query<&mut Text, With<LivesText>>,
 ) {
     if player_state.is_alive {
         if let Ok((player_entity, player_transform)) = player_query.get_single() {
@@ -397,6 +407,11 @@ fn bubble_player_collision_system(
                     collision_events.send_default();
                     commands.entity(player_entity).despawn();
                     player_state.kill();
+
+                    if let Ok(mut lives_text) = lives_text_query.get_single_mut() {
+                        lives_text.sections[0].value = format!("Lives: {}", player_state.lives);
+                    }
+
                     if player_state.is_completely_dead() {
                         game_state.set(AppState::Menu).unwrap();
                         bubble_state.despawn();
