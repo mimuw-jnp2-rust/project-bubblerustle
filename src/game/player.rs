@@ -1,10 +1,10 @@
-use crate::components::{Hook, Movement, Player};
-use crate::{
+use bevy::prelude::*;
+use bevy::time::FixedTimestep;
+use crate::game::components::{Hook, Movement, Player};
+use crate::game::{
     GameTextures, PlayerState, BOTTOM, HOOK_SIZE, HOOK_SPEED, HOOK_WIDTH_SCALE, LEFT, PLAYER_SCALE,
     PLAYER_SIZE, PLAYER_SPEED, RIGHT, TIME_STEP, WALL_SIZE,
 };
-use bevy::prelude::*;
-use bevy::time::FixedTimestep;
 
 pub struct PlayerPlugin;
 

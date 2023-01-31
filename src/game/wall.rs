@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{components::Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
+use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
 
 pub struct WallPlugin;
 

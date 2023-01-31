@@ -1,8 +1,9 @@
-use crate::components::{Bubble, BubbleSize, Movement};
-use crate::{BubbleState, BALL_COLOR, BALL_RADIUS, BALL_SLOWDOWN, BALL_SPEED_X, TIME_STEP};
 use bevy::prelude::*;
 use bevy::sprite::MaterialMesh2dBundle;
 use bevy::time::FixedTimestep;
+use crate::game::components::{Bubble, BubbleSize, Movement};
+use crate::game::{BubbleState, BALL_COLOR, BALL_RADIUS, BALL_SLOWDOWN, BALL_SPEED_X, TIME_STEP};
+
 pub struct BubblePlugin;
 
 impl Plugin for BubblePlugin {
