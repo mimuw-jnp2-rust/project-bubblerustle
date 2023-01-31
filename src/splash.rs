@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use crate::{despawn_screen, AppState};
+use bevy::prelude::*;
 
 pub struct SplashPlugin;
 
@@ -11,19 +11,16 @@ const SPLASH_TIME: f32 = 2.0;
 #[derive(Component)]
 struct SplashScreen;
 
-
 #[derive(Resource, Deref, DerefMut)]
 struct SplashTimer(Timer);
 
 impl Plugin for SplashPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_system_set(SystemSet::on_enter(AppState::Splash).with_system(splash_setup))
-        .add_system_set(SystemSet::on_update(AppState::Splash).with_system(countdown))
-        .add_system_set(
-            SystemSet::on_exit(AppState::Splash)
-                .with_system(despawn_screen::<SplashScreen>),
-        );
+        app.add_system_set(SystemSet::on_enter(AppState::Splash).with_system(splash_setup))
+            .add_system_set(SystemSet::on_update(AppState::Splash).with_system(countdown))
+            .add_system_set(
+                SystemSet::on_exit(AppState::Splash).with_system(despawn_screen::<SplashScreen>),
+            );
     }
 }
 
@@ -45,8 +42,10 @@ fn splash_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         SplashScreen,
     ));
-    commands.insert_resource(SplashTimer(Timer::from_seconds(SPLASH_TIME, TimerMode::Once)));
-
+    commands.insert_resource(SplashTimer(Timer::from_seconds(
+        SPLASH_TIME,
+        TimerMode::Once,
+    )));
 }
 
 fn countdown(

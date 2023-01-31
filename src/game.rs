@@ -1,3 +1,4 @@
+use crate::AppState;
 use bevy::prelude::*;
 use bevy::sprite::collide_aabb::{collide, Collision};
 use bevy::sprite::MaterialMesh2dBundle;
@@ -6,7 +7,6 @@ use components::{Bubble, BubbleSize, Hook, Movement, Player, Wall};
 use player::PlayerPlugin;
 use std::collections::HashSet;
 use wall::WallPlugin;
-use crate::AppState;
 
 mod bubble;
 mod components;
@@ -321,20 +321,19 @@ fn bubble_player_collision_system(
 
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
-        app
-        .add_event::<CollisionEvent>()
-        .add_plugin(WallPlugin)
-        .add_plugin(PlayerPlugin)
-        .add_plugin(BubblePlugin)
-        .add_startup_system(setup_system)
-        .add_system_set(
-            SystemSet::on_update(AppState::Game)
-            .with_system(rope_hook_system)
-            .with_system(hook_wall_collision_system)
-            .with_system(bubble_wall_collision_system)
-            .with_system(bubble_hook_collision_system)
-            .with_system(bubble_player_collision_system)
-            .with_system(bubble_velocity_system)
-        );
+        app.add_event::<CollisionEvent>()
+            .add_plugin(WallPlugin)
+            .add_plugin(PlayerPlugin)
+            .add_plugin(BubblePlugin)
+            .add_startup_system(setup_system)
+            .add_system_set(
+                SystemSet::on_update(AppState::Game)
+                    .with_system(rope_hook_system)
+                    .with_system(hook_wall_collision_system)
+                    .with_system(bubble_wall_collision_system)
+                    .with_system(bubble_hook_collision_system)
+                    .with_system(bubble_player_collision_system)
+                    .with_system(bubble_velocity_system),
+            );
     }
 }

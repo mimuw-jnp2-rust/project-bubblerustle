@@ -1,27 +1,25 @@
-use bevy::prelude::*;
-use bevy::time::FixedTimestep;
 use crate::game::components::{Hook, Movement, Player};
 use crate::game::{
     GameTextures, PlayerState, BOTTOM, HOOK_SIZE, HOOK_SPEED, HOOK_WIDTH_SCALE, LEFT, PLAYER_SCALE,
     PLAYER_SIZE, PLAYER_SPEED, RIGHT, TIME_STEP, WALL_SIZE,
 };
 use crate::AppState;
+use bevy::prelude::*;
+use bevy::time::FixedTimestep;
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app
-        .insert_resource(PlayerState::default())
-        .add_system_set(
-            SystemSet::on_in_stack_update(AppState::Game)
-            .with_system(spawn_player_system)
-        )
-        .add_system_set(
-            SystemSet::on_update(AppState::Game)
-                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-                .with_system(move_player_system)
-                .with_system(shot_player_system)
-        );  
+        app.insert_resource(PlayerState::default())
+            .add_system_set(
+                SystemSet::on_in_stack_update(AppState::Game).with_system(spawn_player_system),
+            )
+            .add_system_set(
+                SystemSet::on_update(AppState::Game)
+                    .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
+                    .with_system(move_player_system)
+                    .with_system(shot_player_system),
+            );
     }
 }
 

@@ -1,23 +1,19 @@
-use bevy::prelude::*;
-use bevy::sprite::MaterialMesh2dBundle;
-use bevy::time::FixedTimestep;
 use crate::game::components::{Bubble, BubbleSize, Movement};
 use crate::game::{BubbleState, BALL_COLOR, BALL_RADIUS, BALL_SLOWDOWN, BALL_SPEED_X, TIME_STEP};
 use crate::AppState;
+use bevy::prelude::*;
+use bevy::sprite::MaterialMesh2dBundle;
+use bevy::time::FixedTimestep;
 pub struct BubblePlugin;
 
 impl Plugin for BubblePlugin {
     fn build(&self, app: &mut App) {
-        app
-        .insert_resource(BubbleState::default())
-        .add_system_set(
-            SystemSet::on_enter(AppState::Game)
-            .with_system(bubble_spawn_system)
-        )
-        .add_system_set(
-            SystemSet::on_update(AppState::Game)
-                .with_run_criteria(FixedTimestep::step(TIME_STEP as f64))
-        );
+        app.insert_resource(BubbleState::default())
+            .add_system_set(SystemSet::on_enter(AppState::Game).with_system(bubble_spawn_system))
+            .add_system_set(
+                SystemSet::on_update(AppState::Game)
+                    .with_run_criteria(FixedTimestep::step(TIME_STEP as f64)),
+            );
     }
 }
 

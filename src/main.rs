@@ -1,9 +1,9 @@
 use bevy::prelude::*;
-use splash::SplashPlugin;
 use game::GamePlugin;
+use splash::SplashPlugin;
 
-mod splash;
 mod game;
+mod splash;
 
 // WINDOW CONFIGURATION
 const GAME_NAME: &str = "Bubble Rustle!";
@@ -13,13 +13,11 @@ const RESIZABLE: bool = false;
 // COLOR
 const BACKGROUND_COLOR: Color = Color::rgb(0.5, 0.45, 0.5);
 
-
 #[derive(Clone, Eq, PartialEq, Debug, Hash)]
 enum AppState {
     Splash,
     Game,
 }
-
 
 fn despawn_screen<T: Component>(to_despawn: Query<Entity, With<T>>, mut commands: Commands) {
     for entity in &to_despawn {
