@@ -1,4 +1,4 @@
-use crate::{despawn_screen, AppState, GAME_NAME};
+use crate::{despawn_screen, AppState, Fonts, GAME_NAME};
 use bevy::app::AppExit;
 use bevy::prelude::*;
 
@@ -9,7 +9,6 @@ const MENU_MARGIN_PX: f32 = 50.0;
 const BUTTON_SIZE_PX: (f32, f32) = (250.0, 65.0);
 const BUTTON_MARGIN_PX: f32 = 20.0;
 
-const TEXT_FONT_FILE: &str = "FiraSans-Bold.ttf";
 const TEXT_COLOR: Color = Color::rgb(1.0, 1.0, 1.0);
 
 const TEXT_PLAY_BUTTON: &str = "Let's Play!";
@@ -61,8 +60,8 @@ fn button_system(
     }
 }
 
-fn main_system(mut commands: Commands, asset_server: Res<AssetServer>) {
-    let font = asset_server.load(TEXT_FONT_FILE.to_string());
+fn main_system(mut commands: Commands, fonts: Res<Fonts>) {
+    let font = fonts.default.clone();
     let button_style = Style {
         size: Size::new(Val::Px(BUTTON_SIZE_PX.0), Val::Px(BUTTON_SIZE_PX.1)),
         margin: UiRect::all(Val::Px(BUTTON_MARGIN_PX)),

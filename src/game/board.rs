@@ -1,14 +1,19 @@
 use bevy::prelude::*;
 
 use crate::game::{Wall, BOTTOM, LEFT, RIGHT, TOP, WALL_COLOR, WALL_SIZE};
-use crate::AppState;
+use crate::{AppState, Fonts};
 
-use super::components::GameScreen;
-pub struct WallPlugin;
+use super::components::{GameScreen, ScoreText};
+pub struct BoardPlugin;
 
-impl Plugin for WallPlugin {
+impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::Game).with_system(add_walls_system));
+        app.add_system_set(
+                SystemSet::on_enter(AppState::Game
+            )
+            .with_system(add_walls_system)
+            .with_system(score_system)
+        );
     }
 }
 
@@ -73,4 +78,26 @@ fn add_walls_system(mut commands: Commands) {
     commands.spawn((WallBundle::new(WallLocation::Right), GameScreen));
     commands.spawn((WallBundle::new(WallLocation::Bottom), GameScreen));
     commands.spawn((WallBundle::new(WallLocation::Top), GameScreen));
+}
+
+
+fn score_system(mut commands: Commands, fonts: Res<Fonts>) {
+    let score_text_style = TextStyle { font: fonts.default.clone(), font_size: 40.0, color: Color::GOLD};
+    commands.spawn((
+        NodeBundle {
+            style: Style {
+                margin: UiRect::all(Val::Auto),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ..default()
+        },
+        GameScreen,
+    ))
+    .with_children(|parent| {
+        parent.spawn((
+            TextBundle::from_section("Score: 0".to_string(), score_text_style),
+            ScoreText
+        ));
+    });
 }

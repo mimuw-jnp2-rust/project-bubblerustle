@@ -19,6 +19,9 @@ pub struct Bubble;
 pub struct Reward;
 
 #[derive(Component)]
+pub struct ScoreText;
+
+#[derive(Component)]
 pub struct RewardScore {
     pub score: usize,
 }
