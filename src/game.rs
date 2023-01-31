@@ -3,10 +3,12 @@ use bevy::prelude::*;
 use bevy::sprite::collide_aabb::{collide, Collision};
 use bevy::sprite::MaterialMesh2dBundle;
 use bubble::BubblePlugin;
-use components::{Bubble, BubbleSize, GameScreen, Hook, Movement, Player, Wall};
+use components::{Bubble, BubbleSize, GameScreen, Hook, Movement, Player, Reward, Wall};
 use player::PlayerPlugin;
 use std::collections::HashSet;
 use wall::WallPlugin;
+
+use self::components::RewardScore;
 
 mod bubble;
 mod components;
@@ -27,6 +29,7 @@ const HOOK_WIDTH_SCALE: f32 = 1.1;
 // COLOR
 const WALL_COLOR: Color = Color::rgb(0.8, 0.8, 0.8);
 const BALL_COLOR: Color = Color::rgb(0.01, 0.9, 0.1);
+const REWARD_COLOR: Color = Color::rgb(1.0, 0.9, 0.);
 
 // GAME_CONFIGURATION
 const LIVE_COUNT: usize = 3;
@@ -36,8 +39,11 @@ const PLAYER_SPEED: f32 = 300.;
 const HOOK_SPEED: f32 = 100.;
 const BALL_SPEED_X: f32 = 200.;
 const BALL_SLOWDOWN: f32 = 600.;
+const REWARD_SPEED: f32 = 300.;
+const REWARD_MIN: usize = 100;
 
 const BALL_RADIUS: f32 = 10.;
+const REWARD_SIZE: f32 = 15.;
 
 const WALL_SIZE: f32 = 20.;
 const LEFT: f32 = -550.;
@@ -46,6 +52,11 @@ const BOTTOM: f32 = -400.;
 const TOP: f32 = 400.;
 
 // RESOURCES
+#[derive(Resource)]
+struct Scores {
+    score_list: Vec<usize>,
+}
+
 #[derive(Resource)]
 struct GameTextures {
     player: Handle<Image>,
@@ -57,6 +68,7 @@ struct CollisionEvent;
 
 #[derive(Resource)]
 struct PlayerState {
+    score: usize,
     lives: usize,
     is_alive: bool,
     hook_shoted: bool,
@@ -83,7 +95,12 @@ impl PlayerState {
         self.lives == 0
     }
 
+    fn add_score(&mut self, score: usize) {
+        self.score += score;
+    }
+
     fn restart(&mut self) {
+        self.score = 0;
         self.lives = LIVE_COUNT;
         self.is_alive = false;
         self.hook_shoted = false;
@@ -93,6 +110,7 @@ impl PlayerState {
 impl Default for PlayerState {
     fn default() -> Self {
         Self {
+            score: 0,
             lives: LIVE_COUNT,
             is_alive: false,
             hook_shoted: false,
@@ -140,7 +158,7 @@ fn setup_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(game_textures);
 }
 
-fn bubble_velocity_system(mut query: Query<(&mut Transform, &mut Movement), With<Bubble>>) {
+fn velocity_system(mut query: Query<(&mut Transform, &mut Movement), Without<Hook>>) {
     for (mut transform, mut movement) in &mut query {
         transform.translation.x += movement.v_x * TIME_STEP;
         transform.translation.y += movement.v_y * TIME_STEP;
@@ -267,12 +285,12 @@ fn bubble_hook_collision_system(
                 commands.entity(hook_entity).despawn();
                 despawned_entities.insert(hook_entity);
                 commands.entity(bubble_entity).despawn();
+                let (bubble_position_x, bubble_position_y) = (
+                    bubble_transform.translation.x,
+                    bubble_transform.translation.y,
+                );
                 if bubble_size.size > 2. {
                     let new_bubble_size = bubble_size.size - 1.;
-                    let (bubble_position_x, bubble_position_y) = (
-                        bubble_transform.translation.x,
-                        bubble_transform.translation.y,
-                    );
                     for a in 0..2 {
                         let direction = if a == 0 { -1. } else { 1. };
                         commands.spawn((
@@ -307,6 +325,32 @@ fn bubble_hook_collision_system(
                         ));
                     }
                 }
+                commands.spawn((
+                    MaterialMesh2dBundle {
+                        mesh: meshes.add(shape::Quad::default().into()).into(),
+                        material: materials.add(ColorMaterial::from(REWARD_COLOR)),
+                        transform: Transform {
+                            translation: Vec3::new(
+                                bubble_position_x,
+                                bubble_position_y,
+                                0.,
+                            ),
+                            scale: Vec3::new(REWARD_SIZE, REWARD_SIZE, 0.),
+                            ..default()
+                        },
+                        ..default()
+                    },
+                    Movement {
+                        v_x: 0.,
+                        v_y: -REWARD_SPEED,
+                        a: 0.,
+                    },
+                    Reward,
+                    RewardScore {
+                        score: REWARD_MIN * (bubble_size.size as usize),
+                    },
+                    GameScreen,
+                ));
                 player_state.unhook();
             }
         }
@@ -351,6 +395,61 @@ fn bubble_player_collision_system(
     }
 }
 
+fn reward_player_collision_system(
+    mut commands: Commands,
+    mut player_state: ResMut<PlayerState>,
+    reward_query: Query<(Entity, &Transform, &RewardScore), With<Reward>>,
+    player_query: Query<&Transform, With<Player>>,
+    mut collision_events: EventWriter<CollisionEvent>,
+) {
+    if player_state.is_alive {
+        if let Ok(player_transform) = player_query.get_single() {
+            for (reward_entity, reward_transform, reward_score) in reward_query.iter() {
+                let collision = collide(
+                    player_transform.translation,
+                    Vec2::new(
+                        player_transform.scale.x * PLAYER_SIZE.0,
+                        player_transform.scale.y * PLAYER_SIZE.1,
+                    ),
+                    reward_transform.translation,
+                    reward_transform.scale.truncate(),
+                );
+
+                if collision.is_some() {
+                    collision_events.send_default();
+                    commands.entity(reward_entity).despawn();
+                    player_state.add_score(reward_score.score);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+fn reward_wall_collision_system(
+    mut commands: Commands,
+    wall_query: Query<&Transform, With<Wall>>,
+    mut reward_query: Query<(Entity, &Transform), With<Reward>>,
+    mut collision_events: EventWriter<CollisionEvent>,
+) {
+    for (reward_entity,reward_transform) in reward_query.iter_mut() {
+        for wall_transform in wall_query.iter() {
+            let collision = collide(
+                reward_transform.translation,
+                reward_transform.scale.truncate(),
+                wall_transform.translation,
+                wall_transform.scale.truncate(),
+            );
+
+            if collision.is_some() {
+                collision_events.send_default();
+                commands.entity(reward_entity).despawn();
+                break;
+            }
+        }
+    }
+}
+
 impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>()
@@ -365,7 +464,9 @@ impl Plugin for GamePlugin {
                     .with_system(bubble_wall_collision_system)
                     .with_system(bubble_hook_collision_system)
                     .with_system(bubble_player_collision_system)
-                    .with_system(bubble_velocity_system),
+                    .with_system(reward_player_collision_system)
+                    .with_system(reward_wall_collision_system)
+                    .with_system(velocity_system),
             )
             .add_system_set(
                 SystemSet::on_exit(AppState::Game).with_system(despawn_screen::<GameScreen>),

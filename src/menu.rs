@@ -78,7 +78,7 @@ fn main_system(mut commands: Commands, asset_server: Res<AssetServer>) {
     };
 
     let button_text_style = TextStyle {
-        font: font.clone(),
+        font,
         font_size: TEXT_BUTTON_SIZE,
         color: TEXT_COLOR,
     };

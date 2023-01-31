@@ -16,6 +16,14 @@ pub struct Wall;
 pub struct Bubble;
 
 #[derive(Component)]
+pub struct Reward;
+
+#[derive(Component)]
+pub struct RewardScore {
+    pub score: usize,
+}
+
+#[derive(Component)]
 pub struct BubbleSize {
     pub size: f32,
 }
